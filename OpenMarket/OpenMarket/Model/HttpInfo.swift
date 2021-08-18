@@ -16,14 +16,14 @@ enum HttpInfo {
     case patchItem(id: Int)
     case postItem
     
-    var urlInfo: (url: String, type: HttpMethod) {
+    var Info: (url: String, type: HttpMethod) {
         switch self {
         case .getItem(let id):
             return (url: HttpInfo.baseURL + "item/\(id)", type: HttpMethod.get)
         case .getItemCollection(let page):
             return (url: HttpInfo.baseURL + "items/\(page)", type: HttpMethod.get)
         case .deleteItem(let id):
-            return (url: HttpInfo.baseURL + "item/\(id)", type: HttpMethod.get)
+            return (url: HttpInfo.baseURL + "item/\(id)", type: HttpMethod.delete)
         case .patchItem(let id):
             return (url: HttpInfo.baseURL + "item/\(id)", type: HttpMethod.patch)
         case .postItem:
