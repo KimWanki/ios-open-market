@@ -25,6 +25,7 @@
 		D19B100F26CBD4C9004CA94E /* Media.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19B100E26CBD4C9004CA94E /* Media.swift */; };
 		D19B101126CBD588004CA94E /* Data+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19B101026CBD588004CA94E /* Data+Extension.swift */; };
 		D1B08A9826C3531E002EF937 /* OpenMarketTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B08A9726C3531E002EF937 /* OpenMarketTests.swift */; };
+		D1F53EE326CE7ACF003E3F05 /* MockSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1F53EE226CE7ACF003E3F05 /* MockSession.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 		D1B08A9526C3531E002EF937 /* OpenMarketTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OpenMarketTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1B08A9726C3531E002EF937 /* OpenMarketTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenMarketTests.swift; sourceTree = "<group>"; };
 		D1B08A9926C3531E002EF937 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D1F53EE226CE7ACF003E3F05 /* MockSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSession.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,12 +174,21 @@
 		D1B08A9626C3531E002EF937 /* OpenMarketTests */ = {
 			isa = PBXGroup;
 			children = (
+				D1F53EE126CE7AB2003E3F05 /* Mock */,
 				9B60CB6626C33F97006EBB40 /* JSONMockData */,
 				9BBA269726C9F9450025DA57 /* TestUtils */,
 				D1B08A9726C3531E002EF937 /* OpenMarketTests.swift */,
 				D1B08A9926C3531E002EF937 /* Info.plist */,
 			);
 			path = OpenMarketTests;
+			sourceTree = "<group>";
+		};
+		D1F53EE126CE7AB2003E3F05 /* Mock */ = {
+			isa = PBXGroup;
+			children = (
+				D1F53EE226CE7ACF003E3F05 /* MockSession.swift */,
+			);
+			path = Mock;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -300,6 +311,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D1F53EE326CE7ACF003E3F05 /* MockSession.swift in Sources */,
 				D1B08A9826C3531E002EF937 /* OpenMarketTests.swift in Sources */,
 				9BBA269926C9F9870025DA57 /* JsonUtil.swift in Sources */,
 			);
