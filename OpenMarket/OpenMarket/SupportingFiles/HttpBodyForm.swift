@@ -18,12 +18,12 @@ protocol HttpBody {
 // MARK:- MultiPartFormData
 struct MultiPartFormData: HttpBody {
     private let params: [String: Any]?
-    private let media: [Media]?
+    private let media: [Image]?
     
     var contentType: String = "multipart/form-data"
     var boundary: String? = "Boundary-\(NSUUID().uuidString)"
     
-    init(params: [String: Any], media: [Media]? = nil) {
+    init(params: [String: Any], media: [Image]? = nil) {
         self.params = params
         self.media = media
     }
