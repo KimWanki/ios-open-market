@@ -20,7 +20,7 @@ struct NetworkHandler {
         self.session = session
     }
     
-    func request(with http: HttpInfo, form: HttpBody? = nil, completionHandler: @escaping () -> Void) {
+    func request(with http: OpenMarketAPI, form: HttpBody? = nil, completionHandler: @escaping () -> Void) {
         guard let url = URL(string: http.Info.url) else { return }
         var urlRequest = URLRequest(url: url)
         
