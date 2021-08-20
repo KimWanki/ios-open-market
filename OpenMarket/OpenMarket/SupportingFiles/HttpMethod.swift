@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum HttpMethod: String, CustomStringConvertible {
+enum HttpMethod: String, CustomStringConvertible, CaseIterable {
     case get    = "GET"
     case post   = "POST"
     case patch  = "PATCH"
