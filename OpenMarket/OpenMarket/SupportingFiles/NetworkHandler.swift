@@ -15,41 +15,38 @@ extension URLSession: sessionComponent {}
 
 struct NetworkHandler {
     private let session: sessionComponent
+    private let valuableMethod: [HttpMethod]
     
-    init(session: sessionComponent) {
+    init(session: sessionComponent = URLSession.shared, valuableMethod: [HttpMethod] = HttpMethod.allCases) {
         self.session = session
+        self.valuableMethod = valuableMethod
     }
     
-    func request(with http: OpenMarketAPI, form: HttpBody? = nil, completionHandler: @escaping () -> Void) {
-        guard let url = URL(string: http.Info.url) else { return }
+    func request(with http: OpenMarketAPI, form: HttpBody? = nil, completionHandler: @escaping (Result<Data, Error>) -> Void) {
+        guard valuableMethod.contains(http.request.type),
+              let url = URL(string: http.request.url)
+        else { return }
+        
         var urlRequest = URLRequest(url: url)
-        
         let contentType = form?.contentType ?? "application/json"
-        urlRequest.httpMethod = http.Info.type.description
+        urlRequest.httpMethod = http.request.type.description
         
-        if let httpBody = form?.createBody() {
-            if let boundary = form?.boundary {
-                urlRequest.setValue(contentType + "; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-            } else {
-                urlRequest.setValue(contentType, forHTTPHeaderField: "Content-Type")
-            }
+        if let httpBody = try? form?.createBody() {
+            urlRequest.setValue(contentType, forHTTPHeaderField: "Content-Type")
             urlRequest.httpBody = httpBody
         }
         
         session.dataTask(with: urlRequest) { data, response, error in
-            if let response = response {
-                print(response)
-            }
+            guard let error = error else { return }
+            guard let response = response as? HTTPURLResponse,
+                  (200...299).contains(response.statusCode) else { return }
+            
+            
             if let data = data {
-                do {
-                    let json = try JSONSerialization.jsonObject(with: data, options: [])
-                    print(json)
-                } catch {
-                    print(error)
-                }
+                completionHandler(.success(data))
             }
         }.resume()
-        completionHandler()
+        
     }
     
     func generateBoundary() -> String {

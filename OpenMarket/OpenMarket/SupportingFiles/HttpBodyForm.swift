@@ -11,27 +11,32 @@ typealias Parameters = [String: Any]
 
 protocol HttpBody {
     var contentType: String { get }
-    var boundary: String? { get }
-    func createBody() -> Data
+    func createBody() throws -> Data
+}
+
+enum HttpBodyError: Error {
+    case NotFoundData
+    case NoBoundaryInformation
 }
 
 // MARK:- MultiPartFormData
 struct MultiPartFormData: HttpBody {
     private let params: [String: Any]?
-    private let media: [Image]?
+    private let images: [Image]?
+    private let boundary: String = "Boundary-\(NSUUID().uuidString)"
     
-    var contentType: String = "multipart/form-data"
-    var boundary: String? = "Boundary-\(NSUUID().uuidString)"
+    var contentType: String {
+        return "multipart/form-data; boundary:\(boundary)"
+    }
     
     init(params: [String: Any], media: [Image]? = nil) {
         self.params = params
-        self.media = media
+        self.images = media
     }
     
-    func createBody() -> Data {
+    func createBody() throws -> Data {
         let lineBreak = "\r\n"
         var body = Data()
-        guard let boundary = boundary else { return Data() }
         
         if let parameters = params {
             for (key, value) in parameters {
@@ -41,7 +46,7 @@ struct MultiPartFormData: HttpBody {
             }
         }
         
-        if let media = media {
+        if let media = images {
             for photo in media {
                 body.append("--\(boundary + lineBreak)")
                 body.append("Content-Disposition: form-data; name=\"\(photo.key)\"; filename=\"\(photo.filename)\"\(lineBreak)")
@@ -52,7 +57,6 @@ struct MultiPartFormData: HttpBody {
         }
             
         body.append("--\(boundary)--\(lineBreak)")
-        
         print(String(decoding: body, as: UTF8.self))
         return body
     }
@@ -60,7 +64,6 @@ struct MultiPartFormData: HttpBody {
 
 // MARK:- JsonObject
 struct JsonObject: HttpBody {
-    var boundary: String?
     var contentType: String = "application/json"
     
     private let params: [String: Any]
@@ -69,8 +72,8 @@ struct JsonObject: HttpBody {
         self.params = params
     }
     
-    func createBody() -> Data {
-        params
-        return Data()
+    func createBody() throws -> Data {
+        guard let data = try? JSONSerialization.data(withJSONObject: params, options: []) else { throw HttpBodyError.NotFoundData }
+        return data
     }
 }
