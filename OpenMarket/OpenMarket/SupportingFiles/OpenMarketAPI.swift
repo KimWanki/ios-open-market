@@ -16,7 +16,7 @@ enum OpenMarketAPI {
     case patchItem(id: Int)
     case postItem
     
-    var Info: (url: String, type: HttpMethod) {
+    var request: (url: String, type: HttpMethod) {
         switch self {
         case .getItem(let id):
             return (url: OpenMarketAPI.baseURL + "item/\(id)", type: HttpMethod.get)
