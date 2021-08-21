@@ -1,3 +1,4 @@
+
 ### 오픈 마켓 프로젝트  
 ---  
   
@@ -9,20 +10,25 @@
 
 #### 프로젝트 UML  
 ---
+#### 변경 전
+<br>
+
 ![Untitled (1)](https://user-images.githubusercontent.com/57824307/129960365-26b40001-8d2c-425a-943c-68943b0366f5.png)
+#### 변경 후
+<br>
+
+`HttpMethod`가 서버 API 문서의 요청에 따라 결정된다고 판단해 `HttpInfo` 내부 구현을 진행했는데, 서버 API가 호출되지 않더라도 `HttpMethod`는 존재해야하기 때문에 외부 `Enum` 타입으로 변경하였습니다.  
+`networkHandler`가 `session`을 주입하는 형태로 진행하게 되면, 독립적인 테스트가 가능해지고, 의존 관계가 프로토콜로 역전되기 때문에 `sessionable`을 주입하는 형태로 코드 구성을 변경하였습니다.
+
+
+![130207331-a68bf8e7-34fa-4f79-97fe-ea82d0d39c16](https://user-images.githubusercontent.com/57824307/130315097-ef25641b-c047-4f80-ac70-ff6d0e7b0207.png)
 
 P.O.P에 대한 학습을 위해 HttpBody 프로토콜을 만들고, 이를 채택한 `MultipartForm`이나 `JsonObject` 타입을 구현해, `NetworkHandler`는 `HttpBody`을 의존하도록 프로젝트 방향을 설정했습니다.
 
 서버 API 문서에서 유저의 요청 URL이 들어오면, 이에 따른 `HttpMethod`이 매칭되야 한다고 생각해서 `HttpInfo` 내부에 중첩 타입으로 구현했습니다.
 
-`NetworkHandler`
 
-
-
-
-
-
-
+객체 간의 의존 관계가 생기는 것을 방지하기 위해 프로토콜를 선언하고 활용해 코드를 작성했습니다. 복잡도가 높아지는 결과를 가져올 순 있지만, 코드를 관리하는 관점에서 효율적이지 않을까 생각합니다.
 
 
 
