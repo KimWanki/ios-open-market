@@ -7,6 +7,10 @@
 기간 : 2021년 8월 9일 → 2021년 8월 27일(진행중)
 
 
+### 실행 화면
+![open](https://user-images.githubusercontent.com/57824307/130350375-b1f317d7-892a-453a-bd7b-62eafff75db5.gif)
+
+
 
 #### 프로젝트 UML  
 ---
