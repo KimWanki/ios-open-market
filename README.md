@@ -1,4 +1,5 @@
 
+
 ### 오픈 마켓 프로젝트  
 ---  
   
@@ -12,7 +13,7 @@
 
 |grid와 list 형태 변경|
 |---|
-|![실행화면](https://user-images.githubusercontent.com/57824307/130386322-37eb09b6-2ebf-4b87-a94e-7c86d592bdc3.gif)|
+|![실행화면2](https://user-images.githubusercontent.com/57824307/130386864-f3cd1d1c-79e7-440c-9cb9-b2313608cbf1.gif)|
 |이미지 캐시 적용, viewMode 별 cell layout 별도 지정|
 
 #### 프로젝트 UML  
