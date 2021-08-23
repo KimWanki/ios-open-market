@@ -6,82 +6,125 @@
 
 import UIKit
 
+enum APIError: Error {
+    case data
+    case responseFail
+    case decodingJSON
+}
 class MainViewController: UIViewController {
-//    private let itemCollection: [ItemCollection]
-    let networkHandler = NetworkHandler()
+    private var items: [CollectionItem] = []
+    private var totalPage: Int = 1
+    private var lastPage: Int = 1
+    private var viewMode: MarketLayout = MarketLayout.init(type: .list)
     
+    var isPaging: Bool = false
+    var hasNextPage: Bool = false
+    
+    let networkHandler = NetworkHandler()
+  
+    @IBOutlet weak var viewModeSegmented: UISegmentedControl!
+    
+    @IBOutlet weak var marketCollectionView: UICollectionView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        
-        networkHandler.request(with: OpenMarketAPI.getItem(id: 551)) { data in
-            print("")
+        requestItems(at: lastPage)
+        marketCollectionView.reloadData()
+        viewModeSegmented.addTarget(self, action: #selector(changeViewMode), for: .valueChanged)
+    }
+    
+    @objc func changeViewMode() {
+        if viewMode.type == .grid {
+            viewMode.type = .list
+        } else {
+            viewMode.type = .grid
         }
+        marketCollectionView.reloadData()
+    }
+}
+
+extension MainViewController {
+    private enum Constraint {
+        private enum Inset {
+            static let left: CGFloat = 5
+            static let right: CGFloat = 5
+            static let top: CGFloat = 5
+            static let down: CGFloat = 5
+        }
+        static let itemSpace: CGFloat = 5
+        static let lineSpace: CGFloat = 5
         
-        //        networkHandler.request(with: OpenMarketAPI.getItemCollection(page: 1)) {
-        //            print("아이템들을 다가져왔슴둥.")
-        //        }
-        ////
-        //        guard let media = Image(withImage: #imageLiteral(resourceName: "dimsum"), forKey: "images[]") else { return }
-        //        networkHandler.request(with: OpenMarketAPI.postItem, form: MultiPartFormData(params: ["title":"루얀 만두", "descriptions": "샬롯 추천 대박 상품!", "price":19060, "stock":999, "discounted_price": 5, "password":12345, "currency":"KRW"], media: [media])) {
-        //            print("아이템을 서버에 추가했슴둥.")
-        //        }
-        
-        //
-        //        networkHandler.request(with: OpenMarketAPI.patchItem(id: 518), form: MultiPartFormData(params: ["descriptions":"샬롯 추천 대박 상품! 에어 프라이어 180도 10분 진리의 만두, 알구몬 추천", "password":"12345"])) {
-        //            print("서버에 있는 아이템을 수정했슴둥")
-        //        }
-        //
-        //        networkHandler.request(with: OpenMarketAPI.deleteItem(id: 550), form: JsonObject(params: ["password":"12345"])) {
-        //            print("아이템 삭제")
-        //        }
+        static let GridWidthSpacing: CGFloat = itemSpace + Inset.left + Inset.right
+        static let GridHeightSpacing: CGFloat = lineSpace + Inset.top + Inset.down
+        static let ListWidthSpacing: CGFloat = Inset.left + Inset.right
+        static let ListHeightSpacing: CGFloat = Inset.top + Inset.down
+    }
+    
+    func requestItems(at page: Int){
+        networkHandler.request(with: .getItemCollection(page: page)) { result in
+            switch result {
+            case .success(let data):
+                guard let model = try? JsonHandler().decodeJSONData(json: data, model: ItemCollection.self) else { return }
+                self.items.append(contentsOf: model.items)
+                self.totalPage = model.page + 1
+                DispatchQueue.main.async {
+                    self.marketCollectionView.reloadData()
+                }
+            default:
+                break
+            }
+        }
     }
 }
 
 extension MainViewController: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        print(items.count)
+        return items.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ItemCollectionCell.cellIdentifier, for: indexPath) as? ItemCollectionCell else { fatalError() }
-        
-        //configure
-        cell.titleLabel.text = "산체스 만두 꿀맛"
-        if indexPath.item % 2 == 1 {
-            cell.priceLabel.text = """
-            firstline
-            secondline
-            """
+        if viewMode.type == .grid {
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ItemCollectionCell.cellReusableIdentifier, for: indexPath) as? ItemCollectionCell else { fatalError() }
+            let item = items[indexPath.item]
+            cell.configuration(with: item)
+            return cell
         } else {
-            cell.priceLabel.text = "firstline"
+            guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ItemListCell.cellReusableIdentifier, for: indexPath) as? ItemListCell else { fatalError() }
+            let item = items[indexPath.item]
+            cell.configuration(with: item)
+            return cell
         }
-        return cell
     }
-    
-    
 }
 
+extension MainViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        if lastPage < totalPage && indexPath.row == items.count - 5 {
+            lastPage += 1
+            requestItems(at: lastPage)
+        }
+    }
+}
 
 extension MainViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        guard let layout = collectionViewLayout as? UICollectionViewFlowLayout else { return CGSize.zero }
-        
-        let bounds = collectionView.bounds
-        
-        var width = bounds.width
-        var height = bounds.height
-        
-        let marginX = layout.sectionInset.left + layout.sectionInset.right
-        let marginY = layout.sectionInset.bottom + layout.sectionInset.top
-            
-        width = (width - ( marginX + layout.minimumInteritemSpacing * 1)) / 2
-        height = width * 1.5
-//        height = (height - ( marginY + layout.minimumLineSpacing * 2 )) / 3
-        
-        return CGSize(width: width.rounded(.down), height: height.rounded(.down))
+        let listCellSize = CGSize(width: (collectionView.bounds.size.width - Constraint.ListWidthSpacing), height: ((collectionView.bounds.size.width - Constraint.ListHeightSpacing) / 6) * 1.618)
+        let gridCellSize = CGSize(width: (collectionView.bounds.size.width - Constraint.GridWidthSpacing) / 2, height: ((collectionView.bounds.size.width - Constraint.GridHeightSpacing) / 2) * 1.618)
+ 
+        if viewMode.type == .grid {
+            return gridCellSize
+        } else {
+            return listCellSize
+        }
     }
     
+    struct MarketLayout {
+        var type: Mode = .grid
+        
+        enum Mode {
+            case grid
+            case list
+        }
+    }
 }
-
