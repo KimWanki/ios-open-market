@@ -8,9 +8,12 @@
 
 
 ### 실행 화면
-![open](https://user-images.githubusercontent.com/57824307/130350375-b1f317d7-892a-453a-bd7b-62eafff75db5.gif)
 
 
+|grid와 list 형태 변경|
+|---|
+|![실행화면](https://user-images.githubusercontent.com/57824307/130386322-37eb09b6-2ebf-4b87-a94e-7c86d592bdc3.gif)|
+|이미지 캐시 적용, viewMode 별 cell layout 별도 지정|
 
 #### 프로젝트 UML  
 ---
