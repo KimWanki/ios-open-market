@@ -1,15 +1,14 @@
 //
-//  ItemCollectionCell.swift
+//  ItemListCell.swift
 //  OpenMarket
 //
-//  Created by WANKI KIM on 2021/08/20.
+//  Created by WANKI KIM on 2021/08/22.
 //
 
 import UIKit
-let imageLoader = ImageLoader(session: URLSession.shared)
 
-class ItemCollectionCell: UICollectionViewCell {
-    static let cellReusableIdentifier = "\(ItemCollectionCell.self)"
+class ItemListCell: UICollectionViewCell {
+    static let cellReusableIdentifier = "\(ItemListCell.self)"
     
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var priceLabel: UILabel!
@@ -23,7 +22,7 @@ class ItemCollectionCell: UICollectionViewCell {
         self.layer.borderWidth = 1
         self.layer.borderColor = UIColor.gray.cgColor.copy(alpha: 0.6)
         
-        self.titleLabel.adjustsFontSizeToFitWidth = true
+//        self.titleLabel.adjustsFontSizeToFitWidth = true
         self.priceLabel.adjustsFontSizeToFitWidth = true
         self.discountPriceLabel.adjustsFontSizeToFitWidth = true
         self.stockLabel.adjustsFontSizeToFitWidth = true
@@ -66,8 +65,3 @@ class ItemCollectionCell: UICollectionViewCell {
         self.stockLabel.textColor = nil
     }
 }
-
-// KingFisher
-// 이미지 로더에 url을 넣으면 자동으로 UIImage가 나오도록 함.
-// 뭔가 이미지 파일을 다운로드 받으면, 다운로드 시간이 걸린다.
-// 그 사이에 재사용이 되어버릴 경우, scroll을 해버릴 경우, 안보여줘도 되는 경우가 
