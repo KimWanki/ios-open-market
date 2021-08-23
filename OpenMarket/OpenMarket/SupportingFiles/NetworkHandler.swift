@@ -9,6 +9,7 @@ import Foundation
 
 protocol sessionComponent {
     func dataTask(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask
+    func invalidateAndCancel()
 }
 
 extension URLSession: sessionComponent {}
@@ -22,7 +23,7 @@ struct NetworkHandler {
         self.valuableMethod = valuableMethod
     }
     
-    func request(with http: OpenMarketAPI, form: HttpBody? = nil, completionHandler: @escaping (Result<Data, Error>) -> Void) {
+    func request(with http: OpenMarketAPI, form: HttpBody? = nil, completionHandler: @escaping (Result<Data, APIError>) -> Void) {
         guard valuableMethod.contains(http.request.type),
               let url = URL(string: http.request.url)
         else { return }
@@ -37,19 +38,17 @@ struct NetworkHandler {
         }
         
         session.dataTask(with: urlRequest) { data, response, error in
-            guard let error = error else { return }
+            guard error == nil else {
+                completionHandler(.failure(APIError.data))
+                return }
             guard let response = response as? HTTPURLResponse,
-                  (200...299).contains(response.statusCode) else { return }
-            
-            
+                  (200...299).contains(response.statusCode) else {
+                completionHandler(.failure(APIError.responseFail))
+                return
+            }
             if let data = data {
                 completionHandler(.success(data))
             }
         }.resume()
-        
-    }
-    
-    func generateBoundary() -> String {
-        return "Boundary-\(NSUUID().uuidString)"
     }
 }
