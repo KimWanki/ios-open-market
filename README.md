@@ -41,11 +41,16 @@ P.O.P에 대한 학습을 위해 HttpBody 프로토콜을 만들고, 이를 채�
 
 
 
+
+
 #### Issue & What I Learn
 
 ---
 
 **기존에 공부한 내용을 바탕으로 프로젝트를 진행하면서 발생 가능한 문제점과 학습해야할 사항을 미리 정리해보았습니다.**
+
+
+
 
 1. 실제 서버 통신과 무관한 UnitTest
 
@@ -84,7 +89,102 @@ P.O.P에 대한 학습을 위해 HttpBody 프로토콜을 만들고, 이를 채�
 
   </details>
 
+실제 테스트 시 독립적인 테스트가 가능해야하기 때문에 네트워크에 의존적인 코드가 독립적인 동작이 가능하도록 설계
+  
+  ```
+    func test_네트워크가연결되지않았을때_연결상태를가정한_request_GET메서드_테스트(){
+        // given
+        let expectation = XCTestExpectation(description: "wait for networking")
+        var valueCheck: Data?
+        var collectionCheck: ItemCollection?
+        networkHandler = NetworkHandler.init(session: MockSession(isSuccess: true))
+        // when
+        networkHandler.request(with: OpenMarketAPI.getItemCollection(page: 1)) { result in
+            switch result {
+            case .success(let data):
+                valueCheck = data
+                collectionCheck = try? JsonHandler().decodeJSONData(json: valueCheck, model: ItemCollection.self)
+            case .failure:
+                XCTFail()
+                return
+            }
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 5.0)
+        // then
+        XCTAssertEqual(collectionCheck!, itemCollectionDummyData)
+    }
+}
+```
+  
+  
+URLSession 타입이 아닌 sessionComponent라는 프로토콜을 정의하고, 해당 프로토콜의 요구를 따르는 메서드들을 원하는 상황으로 구현
+MockSession을 주입할 때, 성공 케이스인지 실패 케이스인지 구분해 생성자를 입력 받고, 케이스에 따라 dataTask의 응답 메시지를 성공와 실패로 구분 지음.
+  
+```
+class MockSession: sessionComponent {
+    func invalidateAndCancel() {
+        print("취소")
+    }
+    var mockURLSessionDataTask = MockURLSessionDataTask()
+    
+    var sampleData: Data {
+        Data(
+        """
+        {
+            "page": 1,
+            "items": [
+            {
+                    "id": 1,
+                    "title": "MacBook Pro",
+                    "price": 1690,
+                    "currency": "USD",
+                    "stock": 0,
+                    "thumbnails": [
+                        "https://camp-open-market.s3.ap-northeast-2.amazonaws.com/thumbnails/1-1.png",
+                        "https://camp-open-market.s3.ap-northeast-2.amazonaws.com/thumbnails/1-2.png"
+                    ],
+                "registration_date": 1611523563.7237701
+            }
+            ]
+        }
+        """.utf8
+        )
+    }
+    
+    
+    let successResponse = HTTPURLResponse(url: URL(string: "https://yagom.market.com/items/1")!,
+                                          statusCode: 200,
+                                          httpVersion: "2",
+                                          headerFields: nil)
+    
+    let failureResponse = HTTPURLResponse(url: URL(string: "https://yagom.market.com/items/1")!,
+                                          statusCode: 500,
+                                          httpVersion: "2",
+                                          headerFields: nil)
+    private let isSuccess: Bool
+    
+    init(isSuccess: Bool) {
+        self.isSuccess = isSuccess
+    }
+    
+    func dataTask(with request: URLRequest, completionHandler: @escaping (Data?, URLResponse?, Error?) -> Void) -> URLSessionDataTask {
+        if isSuccess {
+            mockURLSessionDataTask.runWhenResumeDidCall = { [self] in
+                completionHandler(sampleData, successResponse, nil)
+            }
+        } else {
+            mockURLSessionDataTask.runWhenResumeDidCall = { [self] in
+                completionHandler(nil, failureResponse, APIError.responseFail)
+            }
+        }
+        return mockURLSessionDataTask
+    }
+}
+```
 
+  
+  
 
 2. 셀의 이미지 지연 로딩 및 뷰의 재사용 문제
 <details>
